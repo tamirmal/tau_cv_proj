@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.svm import SVC
 from sklearn.model_selection import GridSearchCV, StratifiedKFold, train_test_split
+from sklearn.metrics import confusion_matrix, classification_report
 import pylab as pl
 
 def data_preprocessing(X):
@@ -41,8 +42,9 @@ def train_classifier(X, Y):
     return grid.best_estimator_
 
 
-from sklearn.metrics import confusion_matrix, classification_report
 def train_classifier_v2(X, Y):
+    print("Number of samples for train & validation = {}".format(len(Y)))
+
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
 
     param = [

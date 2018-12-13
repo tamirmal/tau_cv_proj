@@ -42,5 +42,6 @@ def vgg_prepare_features_for_train(img_list):
         features_list.append(features)
         classes_list.append(img['class'])
 
+    import ipdb; ipdb.set_trace()
     return features_list, classes_list
 # End of vgg_prepare_features_for_train
