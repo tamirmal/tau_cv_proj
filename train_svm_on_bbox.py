@@ -3,6 +3,7 @@ from VGG_feature_extract import vgg_features_extract
 import os
 import numpy as np
 import pickle
+from sklearn.externals import joblib
 
 
 def main():
@@ -35,13 +36,15 @@ def main():
                     'class': cls,
                 })
 
-    if True:
-        X, Y = vgg_features_extract.vgg_prepare_features_for_train(img_list)
-        X = np.reshape(X, (len(X), -1))
+    X, Y = vgg_features_extract.vgg_prepare_features_for_train(img_list)
+    X = np.reshape(X, (len(X), -1))
+    cls = svc_over_cnn.train_classifier_v2(X, Y)
 
-    cls = svc_over_cnn.train_classifier(X, Y)
-    with open(base_path + '/svm_best_cls.dump') as outf:
-        pickle.dump(cls, outf)
+    out_cls_path = base_path + '/svm_best_cls.dump'
+    if os.path.exists(out_cls_path):
+        joblib.dump(cls, out_cls_path)
+    else:
+        print("Cannot save trained svm model to {0}.".format(out_cls_path))
 
 # End of main
 
