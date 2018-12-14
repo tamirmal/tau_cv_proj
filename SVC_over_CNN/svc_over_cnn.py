@@ -44,19 +44,19 @@ def train_classifier(X, Y):
 
 def train_classifier_v2(X, Y):
     print("Number of samples for train & validation = {}".format(len(Y)))
-
     X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
+    print("{} samples for train&validation, {} samples for test".format(len(y_train), len(y_test)))
 
     param = [
         {
             "kernel": ["linear"],
             "C": [1, 10, 100, 1000]
         },
-        {
-            "kernel": ["rbf"],
-            "C": [1, 10, 100, 1000],
-            "gamma": [1e-2, 1e-3, 1e-4, 1e-5]
-        }
+#        {
+#            "kernel": ["rbf"],
+#            "C": [1, 10, 100, 1000],
+#            "gamma": [1e-2, 1e-3, 1e-4, 1e-5]
+#        }
     ]
 
     # request probability estimation
@@ -69,9 +69,8 @@ def train_classifier_v2(X, Y):
 
     print("\nBest parameters set:")
     print(clf.best_params_)
-
+    print("Run on test set :")
     y_predict = clf.predict(X_test)
-
     labels = sorted(list(set(Y)))
     print("\nConfusion matrix:")
     print("Labels: {0}\n".format(",".join(labels)))

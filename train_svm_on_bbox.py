@@ -46,7 +46,7 @@ def main():
                     'class': cls,
                 })
 
-    X, Y = vgg_features_extract.vgg_prepare_features_for_train(img_list)
+    X, Y = vgg_features_extract.vgg_prepare_features_for_train_v2(img_list)
     X = np.reshape(X, (len(X), -1))
     cls = svc_over_cnn.train_classifier_v2(X, Y)
 
