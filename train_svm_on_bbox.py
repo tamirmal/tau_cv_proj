@@ -5,6 +5,7 @@ import numpy as np
 import pickle
 from sklearn.externals import joblib
 from optparse import OptionParser
+from sklearn.model_selection import train_test_split
 
 
 def main():
@@ -22,6 +23,7 @@ def main():
         assert 0
 
     img_list = []
+    class_list = []
 
     if not os.path.isdir(base_path_dataset):
         print("Cant locate directory {}".format(base_path_dataset))
@@ -45,10 +47,17 @@ def main():
                     'name': cls_path + '/' + img,
                     'class': cls,
                 })
+            class_list.append(cls)
 
-    X, Y = vgg_features_extract.vgg_prepare_features_for_train_v2(img_list)
-    X = np.reshape(X, (len(X), -1))
-    cls = svc_over_cnn.train_classifier_v2(X, Y)
+    # Split data to train & test
+    img_list_train, img_list_test, class_list_train, class_list_test = train_test_split(img_list, class_list, test_size=0.2)
+    # Extract features + perform augmentation
+    X_train, Y_train = vgg_features_extract.vgg_prepare_features_for_train_v2(img_list_train, class_list_train)
+    X_test, Y_test = vgg_features_extract.vgg_prepare_features_for_train_v2(img_list_test, class_list_test)
+    X_train = np.reshape(X_train, (len(X_train), -1))
+    X_test = np.reshape(X_test, (len(X_test), -1))
+    # Feed to SVM fitting, will test result with the test set
+    cls = svc_over_cnn.train_classifier_v2(X_train, X_test, Y_train, Y_test)
 
     if os.path.exists(out_cls_path):
         joblib.dump(cls, out_cls_path)

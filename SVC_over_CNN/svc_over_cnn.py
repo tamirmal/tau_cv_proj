@@ -42,10 +42,8 @@ def train_classifier(X, Y):
     return grid.best_estimator_
 
 
-def train_classifier_v2(X, Y):
-    print("Number of samples for train & validation = {}".format(len(Y)))
-    X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
-    print("{} samples for train&validation, {} samples for test".format(len(y_train), len(y_test)))
+def train_classifier_v2(X_train, X_test, y_train, y_test):
+    print("Number of samples for train & validation = {}, samples for test {}".format(len(y_train), len(y_test)))
 
     param = [
         {
@@ -59,19 +57,23 @@ def train_classifier_v2(X, Y):
 #        }
     ]
 
-    # request probability estimation
-    svm = SVC(probability=True)
 
-    # 10-fold cross validation, use 4 thread as each fold and each parameter set can be train in parallel
-    clf = GridSearchCV(svm, param, cv=10, n_jobs=4, verbose=3)
+    if True:
+        # request probability estimation
+        svm = SVC(probability=True)
+        # 10-fold cross validation, use 4 thread as each fold and each parameter set can be train in parallel
+        clf = GridSearchCV(svm, param, cv=10, n_jobs=4, verbose=3)
+        clf.fit(X_train, y_train)
+        print("\nBest parameters set:")
+        print(clf.best_params_)
+        clf = clf.best_estimator_
+    else:
+        clf = SVC(kernel='linear', probability=True, C=1)
+        clf.fit(X_train, y_train)
 
-    clf.fit(X_train, y_train)
-
-    print("\nBest parameters set:")
-    print(clf.best_params_)
     print("Run on test set :")
     y_predict = clf.predict(X_test)
-    labels = sorted(list(set(Y)))
+    labels = sorted(list(set(y_test)))
     print("\nConfusion matrix:")
     print("Labels: {0}\n".format(",".join(labels)))
     print(confusion_matrix(y_test, y_predict, labels=labels))
@@ -79,6 +81,6 @@ def train_classifier_v2(X, Y):
     print("\nClassification report:")
     print(classification_report(y_test, y_predict))
 
-    return clf.best_estimator_
+    return clf
 
 # End of train_classifier
