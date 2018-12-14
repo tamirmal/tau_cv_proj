@@ -1,0 +1,5 @@
+This is splittted to TEST, TRAIN dataset
+the model will then do another internal split of the TRAIN set for TRAIN&VALID, TEST sets
+
+I used the The first TEST do asses the model with images it never seen before,
+as the model does augmentations - the split it does might contain images it saw just with flips/rotations.
