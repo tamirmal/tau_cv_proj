@@ -288,7 +288,7 @@ def predit_images(img_names, img_base_path, model_config, model_path, bbox_thres
 
 def main():
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    img_base_path = os.path.join(dir_path, '../DATASET/1')
+    img_base_path = os.path.join(dir_path, '../TRAIN_DATASET')
     img_names = []
     for img in os.listdir(img_base_path):
         img_names.append(img)
