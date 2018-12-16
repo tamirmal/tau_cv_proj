@@ -9,7 +9,6 @@ from keras import backend as K
 from keras.layers import Input
 from keras.models import Model
 from keras_frcnn import roi_helpers
-from keras_frcnn import config
 import keras_frcnn.vgg as nn
 
 sys.setrecursionlimit(40000)
@@ -151,16 +150,14 @@ def load_model(config_path, model_path):
         'C': C,
         'model_rpn': model_rpn,
         'model_classifier': model_classifier,
+        'class_to_color' : class_to_color,
     }
 
     return model_dict
 # End of load_model
 
 
-visualise = True
-
-
-def predit_images(img_names, img_base_path, model_config, model_path, bbox_threshold=0.8):
+def predit_images(img_names, img_base_path, model_config, model_path, bbox_threshold=0.8, visualise=False):
     """
     img_path_list : list of full paths of images to perform predict on
     bbox_threshold : a region with P(class) below this value will be discarded
@@ -177,6 +174,9 @@ def predit_images(img_names, img_base_path, model_config, model_path, bbox_thres
     C = model_dict['C']
     model_rpn = model_dict['model_rpn']
     model_classifier = model_dict['model_classifier']
+
+    # result dict
+    results = {}
 
     # Iterate over each image - do predictions
     for idx, img_name in enumerate(sorted(img_names)):
@@ -250,6 +250,14 @@ def predit_images(img_names, img_base_path, model_config, model_path, bbox_thres
 
         all_dets = []
 
+        results[img_name] = {
+            'bboxes': [],
+            'image': None,
+        }
+
+        if visualise:
+            img_for_visualize = img.copy()
+
         for key in bboxes:
             bbox = np.array(bboxes[key])
 
@@ -259,31 +267,46 @@ def predit_images(img_names, img_base_path, model_config, model_path, bbox_thres
 
                 (real_x1, real_y1, real_x2, real_y2) = get_real_coordinates(ratio, x1, y1, x2, y2)
 
-                cv2.rectangle(img, (real_x1, real_y1), (real_x2, real_y2),
-                              (int(class_to_color[key][0]), int(class_to_color[key][1]), int(class_to_color[key][2])),
-                              thickness=10)
+                if results[img_name]['image'] is None:
+                    results[img_name]['image'] = img
 
-                textLabel = '{}: {}'.format(key, int(100 * new_probs[jk]))
-                all_dets.append((key, 100 * new_probs[jk]))
+                results[img_name]['bboxes'].append(
+                    {
+                        'x_min': real_x1,
+                        'y_min': real_y1,
+                        'x_max': real_x2,
+                        'y_max': real_y2,
+                        'prob': new_probs[jk],
+                    }
+                )
 
-                (retval, baseLine) = cv2.getTextSize(textLabel, cv2.FONT_HERSHEY_COMPLEX, 1, 1)
-                textOrg = (real_x1, real_y1 - 0)
+                if visualise:
+                    cv2.rectangle(img_for_visualize, (real_x1, real_y1), (real_x2, real_y2),
+                                  (int(class_to_color[key][0]), int(class_to_color[key][1]), int(class_to_color[key][2])),
+                                  thickness=10)
 
-                cv2.rectangle(img, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
-                              (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (0, 0, 0), 2)
-                cv2.rectangle(img, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
-                              (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (255, 255, 255), -1)
-                cv2.putText(img, textLabel, textOrg, cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 1)
+                    textLabel = '{}: {}'.format(key, int(100 * new_probs[jk]))
+                    all_dets.append((key, 100 * new_probs[jk]))
+
+                    (retval, baseLine) = cv2.getTextSize(textLabel, cv2.FONT_HERSHEY_COMPLEX, 1, 1)
+                    textOrg = (real_x1, real_y1 - 0)
+
+                    cv2.rectangle(img_for_visualize, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
+                                  (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (0, 0, 0), 2)
+                    cv2.rectangle(img_for_visualize, (textOrg[0] - 5, textOrg[1] + baseLine - 5),
+                                  (textOrg[0] + retval[0] + 5, textOrg[1] - retval[1] - 5), (255, 255, 255), -1)
+                    cv2.putText(img_for_visualize, textLabel, textOrg, cv2.FONT_HERSHEY_DUPLEX, 1, (0, 0, 0), 1)
 
         if visualise:
             from matplotlib import pyplot as plt
             print('Elapsed time = {}'.format(time.time() - st))
             print(all_dets)
             plt.figure()  # figure starts from 1 ...
-            plt.imshow(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+            plt.imshow(cv2.cvtColor(img_for_visualize, cv2.COLOR_BGR2RGB))
             plt.show()
 
-    print("DONE")
+    print("faster_rcnn DONE")
+    return results
 
 
 def main():

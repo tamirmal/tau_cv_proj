@@ -3,11 +3,29 @@ from optparse import OptionParser
 import os
 from keras.applications.vgg16 import VGG16
 from keras.preprocessing import image
-from keras.applications.vgg16 import preprocess_input
 import numpy as np
 from VGG_feature_extract import vgg_features_extract
-from matplotlib import pyplot
-import matplotlib.image as mpimg
+
+
+def predict_classes(arr_images_list, clf, vgg, visualize=False):
+    X = []
+    for img in arr_images_list:
+        features = vgg_features_extract.vgg_extract_features_img_array(img, vgg)
+        X.append(features)
+
+    X = np.array(X)
+    X = np.reshape(X, (len(X), -1))
+    Y = clf.predict(X)
+
+    if visualize:
+        from matplotlib import pyplot
+        for idx, img in enumerate(arr_images_list):
+            fig = pyplot.figure()
+            pyplot.imshow(image.array_to_img(img))
+            fig.title('class {}'.format(Y[idx]))
+            pyplot.show()
+
+    return Y
 
 
 def main():
@@ -43,6 +61,7 @@ def main():
 
     if True:
         for idx, img in enumerate(IMG_LIST):
+            from matplotlib import pyplot
             print("image {} predicted class {}".format(img, Y[idx]))
             IMG_PATH = test_path + '/' + img
             x = image.load_img(IMG_PATH, target_size=(224, 224))
