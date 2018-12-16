@@ -18,12 +18,26 @@ def predict_classes(arr_images_list, clf, vgg, visualize=False):
     Y = clf.predict(X)
 
     if visualize:
+        bus_color_class_color = {
+            '1': 'green',
+            '2': 'yellow-mustard',
+            '3': 'white',
+            '4': 'silver-grey',
+            '5': 'blue',
+            '6': 'red',
+        }
+        import cv2
         from matplotlib import pyplot
         for idx, img in enumerate(arr_images_list):
-            fig = pyplot.figure()
-            pyplot.imshow(image.array_to_img(img))
-            fig.title('class {}'.format(Y[idx]))
+            pyplot.figure()
+            img = img[:,:,::-1]
+
+            img = image.array_to_img(img)
+            pyplot.imshow(img)
+            print("===============================================")
+            print("class : {}={}".format(Y[idx], bus_color_class_color[str(Y[idx])]))
             pyplot.show()
+            print("===============================================")
 
     return Y
 

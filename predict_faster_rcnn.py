@@ -186,6 +186,10 @@ def predit_images(img_names, img_base_path, model_config, model_path, bbox_thres
         st = time.time()
         filepath = os.path.join(img_base_path, img_name)
         img = cv2.imread(filepath)
+        orig_img = img.copy()
+
+        if visualise:
+            img_for_visualize = img.copy()
 
         X, ratio = format_img(img, C)
 
@@ -255,9 +259,6 @@ def predit_images(img_names, img_base_path, model_config, model_path, bbox_thres
             'image': None,
         }
 
-        if visualise:
-            img_for_visualize = img.copy()
-
         for key in bboxes:
             bbox = np.array(bboxes[key])
 
@@ -268,7 +269,7 @@ def predit_images(img_names, img_base_path, model_config, model_path, bbox_thres
                 (real_x1, real_y1, real_x2, real_y2) = get_real_coordinates(ratio, x1, y1, x2, y2)
 
                 if results[img_name]['image'] is None:
-                    results[img_name]['image'] = img
+                    results[img_name]['image'] = orig_img
 
                 results[img_name]['bboxes'].append(
                     {
@@ -281,6 +282,8 @@ def predit_images(img_names, img_base_path, model_config, model_path, bbox_thres
                 )
 
                 if visualise:
+                    print("visualize : {}".format(str((real_x1, real_y1, real_x2, real_y2))))
+
                     cv2.rectangle(img_for_visualize, (real_x1, real_y1), (real_x2, real_y2),
                                   (int(class_to_color[key][0]), int(class_to_color[key][1]), int(class_to_color[key][2])),
                                   thickness=10)
@@ -310,17 +313,23 @@ def predit_images(img_names, img_base_path, model_config, model_path, bbox_thres
 
 
 def main():
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    img_base_path = os.path.join(dir_path, '../TRAIN_DATASET')
+
+    from optparse import OptionParser
+    parser = OptionParser()
+    parser.add_option("-m", "--models", dest="models", help="Path to model.")
+    parser.add_option("-p", "--test", dest="test_path", help="test path.")
+    (options, args) = parser.parse_args()
+
+    img_base_path = options.test_path
     img_names = []
     for img in os.listdir(img_base_path):
         img_names.append(img)
     print("Images to predict {}".format(str(img_names)))
 
-    model_config = os.path.join(dir_path, 'config.pickle')
-    model_path = os.path.join(dir_path, 'model_frcnn.hdf5')
+    model_config = os.path.join(options.models, 'config.pickle')
+    model_path = os.path.join(options.models, 'model_frcnn.hdf5')
 
-    predit_images(img_names, img_base_path, model_config, model_path)
+    predit_images(img_names, img_base_path, model_config, model_path, visualise=True)
 
 
 if __name__ == "__main__":

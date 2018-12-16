@@ -1,5 +1,5 @@
 import os
-from faster_rcnn import predict_faster_rcnn
+import predict_faster_rcnn
 from predict_svm_bbox import predict_classes
 from sklearn.externals import joblib
 from keras.applications.vgg16 import VGG16
@@ -40,18 +40,18 @@ def visualize_bboxes(name, img, bboxes, y, class_to_color):
     plt.show()
 
 
-def run_wrapped_model(out_annotations_file, img_base_path, visualize = False):
+def run_wrapped_model(img_base_path, out_annotations_file, visualize=False):
     if os.path.isfile(out_annotations_file):
         print("output annotations file {} already exists".format(out_annotations_file))
         assert 0
 
     # Load Faster-RCNN models
     this_path = os.path.dirname(os.path.realpath(__file__))
-    config_path = os.path.join(this_path, 'faster_rcnn/config.pickle')
-    model_path = os.path.join(this_path, 'faster_rcnn/model_frcnn.hdf5')
+    config_path = os.path.join(this_path, 'MODELS/config.pickle')
+    model_path = os.path.join(this_path, 'MODELS/model_frcnn.hdf5')
 
     # Load SVM classifier
-    svm_path = os.path.join(this_path, 'svm_best_cls.dump')
+    svm_path = os.path.join(this_path, 'MODELS/svm_best_cls.dump')
     clf = joblib.load(svm_path)
     svm_vgg = VGG16(weights='imagenet', include_top=False)
 
@@ -60,7 +60,7 @@ def run_wrapped_model(out_annotations_file, img_base_path, visualize = False):
         f for f in os.listdir(img_base_path) if f.lower().endswith(('.jpeg', '.jpg'))
     ]
 
-    regions_preds = predict_faster_rcnn.predit_images(img_names, img_base_path, config_path, model_path, visualize)
+    regions_preds = predict_faster_rcnn.predit_images(img_names, img_base_path, config_path, model_path, visualise=visualize)
 
     out_anns_list = []
     # Create warped images for classification
