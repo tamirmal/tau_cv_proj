@@ -5,3 +5,7 @@ faster_rcnn/model_frcnn.hdf5 filter=lfs diff=lfs merge=lfs -text
 svm_best_cls.dump filter=lfs diff=lfs merge=lfs -text
 model_frcnn.hdf5 filter=lfs diff=lfs merge=lfs -text
 vgg16_weights_tf_dim_ordering_tf_kernels.h5 filter=lfs diff=lfs merge=lfs -text
+MODELS/config.pickle filter=lfs diff=lfs merge=lfs -text
+MODELS/model_frcnn.hdf5 filter=lfs diff=lfs merge=lfs -text
+MODELS/svm_best_cls.dump filter=lfs diff=lfs merge=lfs -text
+MODELS/vgg16_weights_tf_dim_ordering_tf_kernels.h5 filter=lfs diff=lfs merge=lfs -text
